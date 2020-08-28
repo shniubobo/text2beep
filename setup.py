@@ -59,6 +59,7 @@ setup(
     extras_require={
         'dev': [
             'coverage[toml]~=5.2.1',
+            'flake8~=3.8.3',
             'pytest>=6.0',
             'pytest-cov~=2.10.1',
             'pytest-timeout~=1.4.2',
