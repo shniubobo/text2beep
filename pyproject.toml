@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=40.8.0", "wheel"]
+build-backend = "setuptools.build_meta:__legacy__"
+
+[tool.pytest.ini_options]
+addopts = "--cov text2beep --cov-report term-missing"
+console_output_style = "count"
+log_format = "%(levelname)s:%(name)s:%(threadName)s:%(lineno)d:%(message)s"
+log_level = "DEBUG"
+minversion = "6.0"
+python_files = "test_*.py"
+testpaths = "tests"
+timeout = 15
+
+[tool.coverage.report]
+exclude_lines = [
+    "pass",
+    "if __name__ == .__main__.:",
+]

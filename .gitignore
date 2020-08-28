@@ -1,0 +1,7 @@
+__pycache__/
+.pytest_cache/
+*.egg-info/
+htmlcov/
+*.bak
+.coverage
+coverage.xml

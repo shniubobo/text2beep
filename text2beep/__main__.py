@@ -1,0 +1,71 @@
+"""\
+This file is part of text2beep.
+
+Copyright (C) 2020 shniubobo
+
+text2beep is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+text2beep is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+text2beep. If not, see <https://www.gnu.org/licenses/>.
+"""
+import argparse
+import logging
+import sys
+
+from .core import *
+from .version import get_version
+
+logging.captureWarnings(True)
+logger = logging.getLogger(__name__)
+
+
+def _get_args():
+    description = 'A CLI tool that converts plaintext sheet music to beeps.'
+    parser = argparse.ArgumentParser(prog='text2beep', description=description,
+                                     add_help=False)
+    parser.add_argument('-h', '--help', action='help',
+                        default=argparse.SUPPRESS,
+                        help='Show this help message and exit.')
+    parser.add_argument('-v', '--verbose', action='store_true', dest='verbose',
+                        help='Enable verbose logging (default to off).')
+    parser.add_argument('-V', '--version', action='store_true', dest='version',
+                        help='Print the version number and exit.')
+    if not ('-V' in sys.argv or '--version' in sys.argv):
+        parser.add_argument('FILE', help='The file to be converted to beeps.')
+    return vars(parser.parse_args())
+
+
+def _parse_args(args):
+    if args['verbose']:
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(levelname)s:%(name)s:%(threadName)s:'
+                                   '%(lineno)d:%(message)s')
+    else:
+        logging.basicConfig(level=logging.INFO)
+    if args['version']:
+        print(f'text2beep {get_version()}')
+        sys.exit(0)
+    return args['FILE']
+
+
+def main():
+    args = _get_args()
+    file = _parse_args(args)
+
+    sheet = JSONSheet(file)
+    synthesizer = Synthesizer(sheet)
+    player = Player()
+    player.connect(synthesizer)
+    logger.info(f'Playing {file}')
+    player.play()
+
+
+if __name__ == '__main__':
+    main()
