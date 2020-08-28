@@ -31,6 +31,13 @@ def test_constants():
 def test_get_version(tmp_path, monkeypatch):
     with monkeypatch.context() as m:
         m.chdir(tmp_path)
+        m.setattr('text2beep.version.POST', None)
+
+        with monkeypatch.context() as m2:
+            m2.setattr('text2beep.version.__file__',
+                       tmp_path / 'text2beep' / 'version.py')
+            assert get_version() == f'{MAJOR}.{MINOR}.{PATCH}'
+
         sp.run(['git', 'init'])
 
         with open('some_file.txt', 'w') as f:
