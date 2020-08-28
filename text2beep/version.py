@@ -15,6 +15,7 @@ A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 text2beep. If not, see <https://www.gnu.org/licenses/>.
 """
+from pathlib import Path
 import subprocess as sp
 
 __all__ = [
@@ -35,6 +36,8 @@ def get_version():
     version = [f'{MAJOR}.{MINOR}.{PATCH}']
     if POST is not None:
         version.append(f'.post{POST}')
+    if not _is_in_git_repo():
+        return ''.join(version)
     try:
         commits_since_last_tag, last_commit_hash = _get_local_changes()
     except TypeError:
@@ -45,6 +48,13 @@ def get_version():
         if _is_dirty():
             version.append('.dirty')
     return ''.join(version)
+
+
+def _is_in_git_repo():
+    dot_git = Path(__file__).parent.parent / '.git'
+    if dot_git.exists():
+        return True
+    return False
 
 
 def _get_local_changes():
