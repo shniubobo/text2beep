@@ -223,6 +223,10 @@ class SynthesizerBuffer:
         return result
 
     def force_flush(self):
+        try:
+            return self.flush()
+        except ValueError:
+            pass
         for track in range(self._dimension):
             zero_since = self._size_needed_before_ready(track)
             self._buffer[track, -zero_since:].fill(0)
