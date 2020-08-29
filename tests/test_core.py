@@ -17,6 +17,7 @@ text2beep. If not, see <https://www.gnu.org/licenses/>.
 """
 from inspect import isgenerator
 from pathlib import Path
+from queue import Queue
 
 import numpy as np
 import pytest
@@ -161,6 +162,18 @@ def test_synthesizer(sheet):
     beat_duration = 1 / sheet.bpm * 60
     bar_duration = int(beat_duration * sheet.numerator)
     assert audio.size == 2.5 * bar_duration * SAMPLE_RATE
+    _test_synthesizer_keyboard_interrupt(sheet)
+
+
+def _test_synthesizer_keyboard_interrupt(sheet):
+    synthesizer = Synthesizer(sheet)
+    synthesizer.start()
+    synthesizer.keyboard_interrupt.set()
+    synthesizer.queue.get()
+    synthesizer.queue.task_done()
+    end_of_stream = synthesizer.queue.get()
+    assert end_of_stream is None
+    synthesizer.join()
 
 
 class DummyOutputStream:
@@ -175,7 +188,36 @@ class DummyOutputStream:
         print(audio)
 
 
-def test_player(sheet, monkeypatch):
+class DummySynthesizer:
+    def __init__(self):
+        self.queue = Queue(1)
+        self.keyboard_interrupt = DummyEvent()
+        self.alive = True
+
+    def start(self):
+        pass
+
+    def is_alive(self):
+        return self.alive
+
+    def join(self, _):
+        dummy_audio = np.ones(SAMPLE_RATE * 3, dtype=DTYPE)
+        for _ in range(2):
+            self.queue.put(dummy_audio)
+            self.queue.join()
+        try:
+            raise KeyboardInterrupt
+        finally:
+            self.queue.put(None)
+            self.alive = False
+
+
+class DummyEvent:
+    def set(self):
+        pass
+
+
+def test_player(sheet, monkeypatch, caplog):
     player = Player()
     with pytest.raises(RuntimeError):
         player.play()
@@ -184,3 +226,12 @@ def test_player(sheet, monkeypatch):
     with monkeypatch.context() as m:
         m.setattr('sounddevice.OutputStream', DummyOutputStream)
         player.play()
+        _test_player_keyboard_interrupt(caplog)
+
+
+def _test_player_keyboard_interrupt(caplog):
+    synthesizer = DummySynthesizer()
+    player = Player()
+    player.connect(synthesizer)
+    player.play()
+    assert 'Got KeyboardInterrupt' in caplog.text
