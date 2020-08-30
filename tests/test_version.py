@@ -33,10 +33,9 @@ def test_get_version(tmp_path, monkeypatch):
         m.chdir(tmp_path)
         m.setattr('text2beep.version.POST', None)
 
-        with monkeypatch.context() as m2:
-            m2.setattr('text2beep.version.__file__',
-                       tmp_path / 'text2beep' / 'version.py')
-            assert get_version() == f'{MAJOR}.{MINOR}.{PATCH}'
+        m.setattr('text2beep.version.__file__',
+                  tmp_path / 'text2beep' / 'version.py')
+        assert get_version() == f'{MAJOR}.{MINOR}.{PATCH}'
 
         sp.run(['git', 'init'])
 
