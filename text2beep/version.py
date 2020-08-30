@@ -60,9 +60,10 @@ def _is_in_git_repo():
 def _get_local_changes():
     proc = sp.run(
         ['git', 'rev-list', '--tags', '--max-count=1', '--abbrev-commit'],
-        capture_output=True)
+        stdout=sp.PIPE, stderr=sp.PIPE)
     last_tag_hash = proc.stdout.decode().strip('\n')
-    proc = sp.run(['git', 'log', '-1', '--format=%h'], capture_output=True)
+    proc = sp.run(['git', 'log', '-1', '--format=%h'],
+                  stdout=sp.PIPE, stderr=sp.PIPE)
     last_commit_hash = proc.stdout.decode().strip('\n')
     if last_tag_hash == last_commit_hash:
         return None
@@ -71,13 +72,13 @@ def _get_local_changes():
     else:
         commit_range = 'HEAD'
     proc = sp.run(['git', 'rev-list', commit_range, '--count'],
-                  capture_output=True)
+                  stdout=sp.PIPE, stderr=sp.PIPE)
     commits_since_last_tag = proc.stdout.decode().strip('\n')
     return commits_since_last_tag, last_commit_hash
 
 
 def _is_dirty():
-    proc = sp.run(['git', 'status', '-s'], capture_output=True)
+    proc = sp.run(['git', 'status', '-s'], stdout=sp.PIPE, stderr=sp.PIPE)
     if not proc.stdout:
         return False
     return True
