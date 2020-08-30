@@ -50,7 +50,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
-    packages=find_packages(include='text2app'),
+    packages=find_packages(),
     python_requires='>=3.6, <4',
     install_requires=[
         'numpy~=1.19.1',
