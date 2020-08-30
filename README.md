@@ -1,5 +1,7 @@
 # text2beep
 
+![Tests](https://github.com/shniubobo/text2beep/workflows/Tests/badge.svg?branch=master&event=push) [![Codecov branch](https://img.shields.io/codecov/c/github/shniubobo/text2beep/master)](https://codecov.io/gh/shniubobo/text2beep) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/shniubobo/text2beep/latest/master?sort=semver)
+
 Language: 中文 | [English](README_en.md)
 
 `text2beep` 是一个可以将纯文本形式的乐谱（目前仅支持 JSON 格式）转换成哔哔声并播放的 CLI 工具。
