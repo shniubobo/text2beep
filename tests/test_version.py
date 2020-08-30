@@ -38,6 +38,8 @@ def test_get_version(tmp_path, monkeypatch):
         assert get_version() == f'{MAJOR}.{MINOR}.{PATCH}'
 
         sp.run(['git', 'init'])
+        sp.run(['git', 'config', 'user.email', '"test@test.com"'])
+        sp.run(['git', 'config', 'user.name', '"text2beep"'])
 
         with open('some_file.txt', 'w') as f:
             f.write('some text\n')
