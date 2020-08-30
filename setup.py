@@ -35,7 +35,7 @@ setup(
         'Source': 'https://github.com/shniubobo/text2beep',
         'Issue Tracker': 'https://github.com/shniubobo/text2beep/issues',
     },
-    license='GNU GPLv3',
+    license='GPL-3.0-or-later',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: End Users/Desktop',
