@@ -42,6 +42,13 @@ def test_get_version(tmp_path, monkeypatch):
 
         with open('some_file.txt', 'w') as f:
             f.write('some text\n')
+        print('-' * 30)
+        sp.run(['git', 'status'])
+        print('-'*30)
+        sp.run(['git', 'status', '-s'])
+        print('-'*30)
+        sp.run(['git', 'log'])
+        print('-' * 30)
         assert get_version() == f'{MAJOR}.{MINOR}.{PATCH}+dirty'
 
         sp.run(['git', 'add', 'some_file.txt'])
