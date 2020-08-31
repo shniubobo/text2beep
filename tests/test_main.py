@@ -31,10 +31,10 @@ class DummyOutputStream:
 
     @staticmethod
     def write(audio):
-        print(audio)
+        print(f'Writing to stream: {audio}')
 
 
-def test_main(monkeypatch, capsys):
+def test_main(monkeypatch, capsys, caplog):
     with monkeypatch.context() as m:
         m.setattr('sys.argv', ['text2beep'])
         try:
@@ -75,4 +75,11 @@ def test_main(monkeypatch, capsys):
         m.setattr('sys.argv',
                   ['text2beep', str(Path('examples/Am-F-G-C.json'))])
         m.setattr('sounddevice.OutputStream', DummyOutputStream)
+        main()
+        assert 'Playing ' in caplog.text
+        stdout, _ = capsys.readouterr()
+        assert stdout.count('Writing to stream: ') == 4
+
+        m.setattr('sys.argv',
+                  ['text2beep', '-q', str(Path('examples/Am-F-G-C.json'))])
         main()
