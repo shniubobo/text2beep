@@ -1,0 +1,9 @@
+codecov:
+  notify:
+    after_n_builds: 9
+
+coverage:
+  range: 90..100
+
+comment:
+  after_n_builds: 9
