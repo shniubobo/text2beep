@@ -300,6 +300,8 @@ class Synthesizer(Thread):
         self._buffer = SynthesizerBuffer(self._track_count, bar_duration)
         self._queue = Queue(1)
         self._keyboard_interrupt = Event()
+        self._note_value_total = \
+            {track: 0 for track in range(self._track_count)}
 
     def run(self):
         try:
@@ -307,6 +309,7 @@ class Synthesizer(Thread):
             self._serve_remaining_buffer_before_stopping()
         finally:
             self._serve_end_of_stream()
+            self._warn_not_matching_value()
 
     def _start_to_synthesize_and_serve(self):
         track_iters = self._get_track_iterators()
@@ -323,6 +326,7 @@ class Synthesizer(Thread):
                         if idx + 1 < self._track_count:
                             break
                         return
+                    self._increase_track_note_value(idx, note[1])
                     logger.debug(f'Synthesizing {note} (track {idx})')
                     audio = self._synthesize_note(note)
                     full = self._buffer.append(idx, audio)
@@ -385,6 +389,20 @@ class Synthesizer(Thread):
         if self._keyboard_interrupt.is_set():
             return True
         return False
+
+    def _warn_not_matching_value(self):
+        track_zero_value = self._note_value_total[0]
+        for value in self._note_value_total.values():
+            if value != track_zero_value:
+                break
+        else:
+            return
+        logger.warning('Total note value of each track not matching!')
+        for track, value in self._note_value_total.items():
+            logger.warning(f'Track {track}: {value}')
+
+    def _increase_track_note_value(self, track, value):
+        self._note_value_total[track] += value
 
     @property
     def queue(self):
