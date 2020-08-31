@@ -152,7 +152,7 @@ class DummyPlayer:
             yield audio
 
 
-def test_synthesizer(sheet):
+def test_synthesizer(sheet, caplog):
     synthesizer = Synthesizer(sheet)
     player = DummyPlayer()
     player.connect(synthesizer)
@@ -162,7 +162,13 @@ def test_synthesizer(sheet):
     beat_duration = 1 / sheet.bpm * 60
     bar_duration = int(beat_duration * sheet.numerator)
     assert audio.size == 2.5 * bar_duration * SAMPLE_RATE
+    assert 'not matching!' in caplog.text
+    assert 'Track 0: 2.5' in caplog.text
+    assert 'Track 1: 2.5' in caplog.text
+    assert 'Track 2: 2.5' in caplog.text
+    assert 'Track 3: 2.0' in caplog.text
     _test_synthesizer_keyboard_interrupt(sheet)
+    _test_synthesizer_matching_note_value(caplog)
 
 
 def _test_synthesizer_keyboard_interrupt(sheet):
@@ -174,6 +180,16 @@ def _test_synthesizer_keyboard_interrupt(sheet):
     end_of_stream = synthesizer.queue.get()
     assert end_of_stream is None
     synthesizer.join()
+
+
+def _test_synthesizer_matching_note_value(caplog):
+    caplog.clear()
+    sheet = JSONSheet(Path('examples/Am-F-G-C.json'))
+    synthesizer = Synthesizer(sheet)
+    player = DummyPlayer()
+    player.connect(synthesizer)
+    player.play()
+    assert 'not matching!' not in caplog.text
 
 
 class DummyOutputStream:
