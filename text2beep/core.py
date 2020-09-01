@@ -31,6 +31,7 @@ from .const import *
 __all__ = [
     'BaseSheet',
     'JSONSheet',
+    'JSONSheetWithSubsheets',
     'Player',
     'Sheet',
     'Synthesizer',
@@ -178,8 +179,11 @@ class BaseSheet(ABC):
 
 class JSONSheet(BaseSheet):
     def _parse(self):
-        with open(self._file, 'r') as f:
-            data = json.load(f)
+        try:
+            with open(self._file, 'r') as f:
+                data = json.load(f)
+        except TypeError:
+            data = self._file
         self._bpm = data['bpm']
         time_sig = data['time_signature'].split('/')
         time_sig = tuple(map(int, time_sig))
@@ -190,9 +194,39 @@ class JSONSheet(BaseSheet):
             self._tracks.append(track)
 
 
+class JSONSheetWithSubsheets(BaseSheet):
+    def _parse(self):
+        with open(self._file, 'r') as f:
+            data = json.load(f)
+        self._subsheets = \
+            [JSONSheet(subsheet) for subsheet in data['subsheets']]
+
+    def __iter__(self):
+        return (subsheet for subsheet in self._subsheets)
+
+    @property
+    def bpm(self):
+        return [subsheet.bpm for subsheet in self._subsheets]
+
+    @property
+    def numerator(self):
+        return [subsheet.numerator for subsheet in self._subsheets]
+
+    @property
+    def denominator(self):
+        return [subsheet.denominator for subsheet in self._subsheets]
+
+    @property
+    def tracks(self):
+        return [subsheet.tracks for subsheet in self._subsheets]
+
+
 class Sheet(BaseSheet, ABC):
     def __new__(cls, *args, **kwargs):
-        return JSONSheet(*args, **kwargs)
+        try:
+            return JSONSheet(*args, **kwargs)
+        except KeyError:
+            return JSONSheetWithSubsheets(*args, **kwargs)
 
 
 class SynthesizerBuffer:
@@ -477,7 +511,10 @@ class SynthesizerHub:
 class Player:
     def __init__(self, sheet):
         self._thread = _PlayerThread()
-        self._synthesizer = SynthesizerHub(sheet)
+        try:
+            self._synthesizer = Synthesizer(sheet)
+        except TypeError:
+            self._synthesizer = SynthesizerHub(*sheet)
         self._thread.connect_queue(self._synthesizer.queue)
 
     def play(self):
