@@ -206,7 +206,7 @@ class SynthesizerBuffer:
         self._ready_until = {track: 0 for track in range(dimension)}
 
     def append(self, track, data):
-        if self._is_track_full(track):
+        if self.is_track_full(track):
             raise ValueError('Buffer of the track already full')
         new_buf_size = len(data)
         last_end = self._ready_until[track]
@@ -218,7 +218,7 @@ class SynthesizerBuffer:
             self._buffer[track, last_end:] = data[:buf_size_avail]
             self._move_forward_ready_until(track, buf_size_avail)
             self._exceeded_buffer[track] = data[buf_size_avail:]
-        return self._is_track_full(track)
+        return self.is_track_full(track)
 
     def flush(self):
         for track in range(self._dimension):
@@ -243,7 +243,7 @@ class SynthesizerBuffer:
         self._take_exceeded_buffer_after_flushing()
         return result
 
-    def _is_track_full(self, track):
+    def is_track_full(self, track):
         full = self._exceeded_buffer[track] is not None \
                or self._size_needed_before_ready(track) == 0
         return full
@@ -326,6 +326,8 @@ class Synthesizer:
         # so that the player can consume it.
         while True:
             for idx, track_iter in enumerate(track_iters):
+                if self._buffer.is_track_full(idx):
+                    continue
                 while True:
                     try:
                         note = next(track_iter)

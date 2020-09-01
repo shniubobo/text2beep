@@ -188,6 +188,7 @@ def test_synthesizer(sheet, caplog):
     assert 'Track 2: 2.5' in caplog.text
     assert 'Track 3: 2.0' in caplog.text
     _test_synthesizer_matching_note_value(caplog)
+    _test_synthesizer_check_track_full()
 
 
 def _test_synthesizer_matching_note_value(caplog):
@@ -197,6 +198,13 @@ def _test_synthesizer_matching_note_value(caplog):
     player = DummyPlayer(synthesizer)
     player.play()
     assert 'not matching!' not in caplog.text
+
+
+def _test_synthesizer_check_track_full():
+    sheet = Sheet(Path('tests/test_sheet_2.json'))
+    synthesizer = Synthesizer(sheet)
+    player = DummyPlayer(synthesizer)
+    player.play()
 
 
 def test_synthesizer_hub(sheet, monkeypatch, caplog):
