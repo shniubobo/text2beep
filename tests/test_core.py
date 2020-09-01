@@ -222,7 +222,7 @@ def _test_synthesizer_hub_error_handling(sheet, monkeypatch, caplog):
         def mocked(_):
             from time import sleep
             # Make sure the underlying Synthesizer-1 has finished synthesizing
-            sleep(0.5)
+            sleep(1)
             raise AssertionError
         m.setitem(synthesizer_hub.__dict__, '_serve_and_wait', mocked)
         for _ in range(1):
