@@ -21,7 +21,7 @@ import json
 import logging
 from queue import Queue
 import re
-from threading import Event, Thread
+from threading import Thread
 
 import numpy as np
 import sounddevice as sd
@@ -295,9 +295,8 @@ class SynthesizerBuffer:
         return True
 
 
-class Synthesizer(Thread):
+class Synthesizer:
     def __init__(self, sheet):
-        super().__init__(name='Synthesizer')
         self._sheet = sheet
         self._track_count = len(sheet.tracks)
         # In seconds
@@ -305,17 +304,16 @@ class Synthesizer(Thread):
         bar_duration = beat_duration * sheet.numerator
         self._buffer = SynthesizerBuffer(self._track_count, bar_duration)
         self._queue = Queue(1)
-        self._keyboard_interrupt = Event()
         self._note_value_total = \
             {track: 0 for track in range(self._track_count)}
 
-    def run(self):
+    def synthesize(self):
         try:
             self._start_to_synthesize_and_serve()
             self._serve_remaining_buffer_before_stopping()
+            self._warn_not_matching_value()
         finally:
             self._serve_end_of_stream()
-            self._warn_not_matching_value()
 
     def _start_to_synthesize_and_serve(self):
         track_iters = self._get_track_iterators()
@@ -341,8 +339,6 @@ class Synthesizer(Thread):
             logger.debug('Serving buffer')
             self._serve_and_wait(self._buffer.flush())
             logger.debug('-' * 50)
-            if self._got_keyboard_interrupt():
-                break
 
     def _get_track_iterators(self):
         return [iter(self._sheet.tracks[idx])
@@ -391,11 +387,6 @@ class Synthesizer(Thread):
         logger.debug('Serving end of stream')
         self._queue.put(None)
 
-    def _got_keyboard_interrupt(self):
-        if self._keyboard_interrupt.is_set():
-            return True
-        return False
-
     def _warn_not_matching_value(self):
         track_zero_value = self._note_value_total[0]
         for value in self._note_value_total.values():
@@ -414,10 +405,6 @@ class Synthesizer(Thread):
     def queue(self):
         return self._queue
 
-    @property
-    def keyboard_interrupt(self):
-        return self._keyboard_interrupt
-
 
 class Player:
     def __init__(self, sheet):
@@ -426,17 +413,8 @@ class Player:
         self._thread.connect_queue(self._synthesizer.queue)
 
     def play(self):
-        self._synthesizer.start()
         self._thread.start()
-        while True:
-            try:
-                if not self._synthesizer.is_alive():
-                    break
-                self._synthesizer.join(1)
-            except KeyboardInterrupt:
-                logger.info('Got KeyboardInterrupt, please wait '
-                            'while the program is exiting')
-                self._synthesizer.keyboard_interrupt.set()
+        self._synthesizer.synthesize()
         self._thread.join()
 
 

@@ -17,7 +17,7 @@ text2beep. If not, see <https://www.gnu.org/licenses/>.
 """
 from inspect import isgenerator
 from pathlib import Path
-from queue import Queue
+from threading import Thread
 
 import numpy as np
 import pytest
@@ -139,30 +139,42 @@ def test_synthesizer_buffer():
 
 
 class DummyPlayer:
-    def __init__(self):
-        self._synthesizer = None
-        self._queue = None
-
-    def connect(self, synthesizer):
-        self._synthesizer = synthesizer
-        self._queue = self._synthesizer.queue
+    def __init__(self, sheet):
+        self._synthesizer = Synthesizer(sheet)
+        self._thread = _DummyPlayerThread()
+        self._thread.queue = self._synthesizer.queue
 
     def play(self):
-        self._synthesizer.start()
+        self._thread.start()
+        self._synthesizer.synthesize()
+        self._thread.join()
+        return self._thread.result
+
+
+class _DummyPlayerThread(Thread):
+    def __init__(self):
+        super().__init__(name='_DummyPlayerThread')
+        self.queue = None
+        self._result = []
+
+    def run(self):
         while True:
-            audio = self._queue.get()
-            self._queue.task_done()
+            audio = self.queue.get()
+            self.queue.task_done()
             if audio is None:
-                yield 'End of stream'
+                self._result.append('End of stream')
                 break
-            yield audio
+            self._result.append(audio)
+
+    @property
+    def result(self):
+        assert not self.is_alive()
+        return self._result
 
 
 def test_synthesizer(sheet, caplog):
-    synthesizer = Synthesizer(sheet)
-    player = DummyPlayer()
-    player.connect(synthesizer)
-    audio = list(player.play())
+    player = DummyPlayer(sheet)
+    audio = player.play()
     assert audio[-1] == 'End of stream'
     audio = np.concatenate(audio[:-1])
     beat_duration = 1 / sheet.bpm * 60
@@ -173,27 +185,13 @@ def test_synthesizer(sheet, caplog):
     assert 'Track 1: 2.5' in caplog.text
     assert 'Track 2: 2.5' in caplog.text
     assert 'Track 3: 2.0' in caplog.text
-    _test_synthesizer_keyboard_interrupt(sheet)
     _test_synthesizer_matching_note_value(caplog)
-
-
-def _test_synthesizer_keyboard_interrupt(sheet):
-    synthesizer = Synthesizer(sheet)
-    synthesizer.start()
-    synthesizer.keyboard_interrupt.set()
-    synthesizer.queue.get()
-    synthesizer.queue.task_done()
-    end_of_stream = synthesizer.queue.get()
-    assert end_of_stream is None
-    synthesizer.join()
 
 
 def _test_synthesizer_matching_note_value(caplog):
     caplog.clear()
-    sheet = JSONSheet(Path('examples/Am-F-G-C.json'))
-    synthesizer = Synthesizer(sheet)
-    player = DummyPlayer()
-    player.connect(synthesizer)
+    sheet = Sheet(Path('examples/Am-F-G-C.json'))
+    player = DummyPlayer(sheet)
     player.play()
     assert 'not matching!' not in caplog.text
 
@@ -207,49 +205,13 @@ class DummyOutputStream:
 
     @staticmethod
     def write(audio):
-        print(audio)
+        print(f'Writing to stream: {audio}')
 
 
-class DummySynthesizer:
-    def __init__(self, _=None):
-        self.queue = Queue(1)
-        self.keyboard_interrupt = DummyEvent()
-        self.alive = True
-
-    def start(self):
-        pass
-
-    def is_alive(self):
-        return self.alive
-
-    def join(self, _):
-        dummy_audio = np.ones(SAMPLE_RATE * 3, dtype=DTYPE)
-        for _ in range(2):
-            self.queue.put(dummy_audio)
-            self.queue.join()
-        try:
-            raise KeyboardInterrupt
-        finally:
-            self.queue.put(None)
-            self.alive = False
-
-
-class DummyEvent:
-    def set(self):
-        pass
-
-
-def test_player(sheet, monkeypatch, caplog):
+def test_player(sheet, monkeypatch, capsys):
     player = Player(sheet)
     with monkeypatch.context() as m:
         m.setattr('sounddevice.OutputStream', DummyOutputStream)
         player.play()
-        _test_player_keyboard_interrupt(monkeypatch, caplog)
-
-
-def _test_player_keyboard_interrupt(monkeypatch, caplog):
-    with monkeypatch.context() as m:
-        m.setattr('text2beep.core.Synthesizer', DummySynthesizer)
-        player = Player(None)
-        player.play()
-        assert 'Got KeyboardInterrupt' in caplog.text
+        stdout, _ = capsys.readouterr()
+        assert stdout.count('Writing to stream: ') == 3
