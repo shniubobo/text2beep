@@ -35,6 +35,7 @@ __all__ = [
     'Sheet',
     'Synthesizer',
     'SynthesizerBuffer',
+    'SynthesizerHub',
     'Track',
 ]
 
@@ -406,10 +407,65 @@ class Synthesizer:
         return self._queue
 
 
+class SynthesizerHub:
+    def __init__(self, *sheets):
+        self._sheets = list(sheets)
+        self._synthesizers = [Synthesizer(sheet) for sheet in self._sheets]
+        self._queue = Queue(1)
+
+    def synthesize(self):
+        try:
+            self._start_synthesizers_and_proxy_queues()
+        finally:
+            self._serve_end_of_stream()
+            self._drain_all_synthesizers()
+
+    def _start_synthesizers_and_proxy_queues(self):
+        for idx, synthesizer in enumerate(self._synthesizers):
+            thread = Thread(target=synthesizer.synthesize,
+                            name=f'Synthesizer-{idx}')
+            thread.start()
+            while True:
+                item = self._consume_one_item_from_queue(synthesizer)
+                if item is None:
+                    break
+                self._serve_and_wait(item)
+            thread.join()
+
+    @staticmethod
+    def _consume_one_item_from_queue(synthesizer):
+        item = synthesizer.queue.get()
+        synthesizer.queue.task_done()
+        return item
+
+    def _serve_and_wait(self, to_serve):
+        self._queue.put(to_serve)
+        self._queue.join()
+
+    def _serve_end_of_stream(self):
+        logger.debug('Serving end of stream')
+        self._queue.put(None)
+
+    def _drain_all_synthesizers(self):
+        for idx, synthesizer in enumerate(self._synthesizers):
+            if synthesizer.queue.empty():
+                logger.debug(f'Queue of synthesizer {idx} empty')
+                continue
+            logger.debug(f'Queue of synthesizer {idx} not empty. Draining it')
+            while True:
+                result = self._consume_one_item_from_queue(synthesizer)
+                if result is None:
+                    break
+
+    @property
+    def queue(self):
+        return self._queue
+
+
 class Player:
     def __init__(self, sheet):
         self._thread = _PlayerThread()
-        self._synthesizer = Synthesizer(sheet)
+        self._synthesizer = SynthesizerHub(sheet)
         self._thread.connect_queue(self._synthesizer.queue)
 
     def play(self):
