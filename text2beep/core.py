@@ -32,6 +32,7 @@ __all__ = [
     'BaseSheet',
     'JSONSheet',
     'Player',
+    'Sheet',
     'Synthesizer',
     'SynthesizerBuffer',
     'Track',
@@ -186,6 +187,11 @@ class JSONSheet(BaseSheet):
         for track in data['tracks']:
             track = Track(''.join(track))
             self._tracks.append(track)
+
+
+class Sheet(BaseSheet, ABC):
+    def __new__(cls, *args, **kwargs):
+        return JSONSheet(*args, **kwargs)
 
 
 class SynthesizerBuffer:

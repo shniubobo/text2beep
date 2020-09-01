@@ -29,7 +29,7 @@ from text2beep.const import DTYPE, NOTE_NUM, SAMPLE_RATE
 @pytest.fixture(name='sheet')
 def fixture_sheet():
     sheet_path = Path(__file__).parent / 'test_sheet.json'
-    return JSONSheet(sheet_path)
+    return Sheet(sheet_path)
 
 
 def test_track():
@@ -107,6 +107,12 @@ def test_json_sheet(sheet):
     assert len(sheet.tracks) == 4
     for track in sheet.tracks:
         assert isinstance(track, Track)
+
+
+def test_sheet(sheet):
+    assert isinstance(sheet, JSONSheet)
+    assert isinstance(sheet, BaseSheet)
+    assert not isinstance(sheet, Sheet)
 
 
 def test_synthesizer_buffer():

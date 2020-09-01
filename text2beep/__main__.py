@@ -63,7 +63,7 @@ def main():
     args = _get_args()
     file = _parse_args(args)
 
-    sheet = JSONSheet(file)
+    sheet = Sheet(file)
     synthesizer = Synthesizer(sheet)
     player = Player()
     player.connect(synthesizer)
