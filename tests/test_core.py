@@ -139,8 +139,8 @@ def test_synthesizer_buffer():
 
 
 class DummyPlayer:
-    def __init__(self, sheet):
-        self._synthesizer = Synthesizer(sheet)
+    def __init__(self, synthesizer):
+        self._synthesizer = synthesizer
         self._thread = _DummyPlayerThread()
         self._thread.queue = self._synthesizer.queue
 
@@ -164,6 +164,7 @@ class _DummyPlayerThread(Thread):
             if audio is None:
                 self._result.append('End of stream')
                 break
+            assert isinstance(audio, np.ndarray)
             self._result.append(audio)
 
     @property
@@ -173,7 +174,8 @@ class _DummyPlayerThread(Thread):
 
 
 def test_synthesizer(sheet, caplog):
-    player = DummyPlayer(sheet)
+    synthesizer = Synthesizer(sheet)
+    player = DummyPlayer(synthesizer)
     audio = player.play()
     assert audio[-1] == 'End of stream'
     audio = np.concatenate(audio[:-1])
@@ -191,9 +193,43 @@ def test_synthesizer(sheet, caplog):
 def _test_synthesizer_matching_note_value(caplog):
     caplog.clear()
     sheet = Sheet(Path('examples/Am-F-G-C.json'))
-    player = DummyPlayer(sheet)
+    synthesizer = Synthesizer(sheet)
+    player = DummyPlayer(synthesizer)
     player.play()
     assert 'not matching!' not in caplog.text
+
+
+def test_synthesizer_hub(sheet, monkeypatch, caplog):
+    synthesizer = SynthesizerHub(sheet, sheet, sheet)
+    player = DummyPlayer(synthesizer)
+    audio = player.play()
+    assert audio[-1] == 'End of stream'
+    audio = np.concatenate(audio[:-1])
+    beat_duration = 1 / sheet.bpm * 60
+    bar_duration = int(beat_duration * sheet.numerator)
+    assert audio.size == 2.5 * bar_duration * SAMPLE_RATE * 3
+    _test_synthesizer_hub_error_handling(sheet, monkeypatch, caplog)
+
+
+def _test_synthesizer_hub_error_handling(sheet, monkeypatch, caplog):
+    synthesizer_hub = SynthesizerHub(sheet, sheet, sheet)
+    thread = Thread(target=synthesizer_hub.synthesize)
+    thread.start()
+    for _ in range(4):
+        synthesizer_hub.queue.get()
+        synthesizer_hub.queue.task_done()
+    with monkeypatch.context() as m:
+        def mocked(_):
+            from time import sleep
+            # Make sure the underlying Synthesizer-1 has finished synthesizing
+            sleep(0.5)
+            raise AssertionError
+        m.setitem(synthesizer_hub.__dict__, '_serve_and_wait', mocked)
+        for _ in range(1):
+            synthesizer_hub.queue.get()
+            synthesizer_hub.queue.task_done()
+    assert 'Draining' in caplog.text
+    thread.join()
 
 
 class DummyOutputStream:
