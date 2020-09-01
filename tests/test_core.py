@@ -29,7 +29,13 @@ from text2beep.const import DTYPE, NOTE_NUM, SAMPLE_RATE
 @pytest.fixture(name='sheet')
 def fixture_sheet():
     sheet_path = Path(__file__).parent / 'test_sheet.json'
-    return Sheet(sheet_path)
+    return JSONSheet(sheet_path)
+
+
+@pytest.fixture(name='sheet_subsheet')
+def fixture_sheet_subsheet():
+    sheet_path = Path('examples/Am-F-G-C.subsheets.json')
+    return JSONSheetWithSubsheets(sheet_path)
 
 
 def test_track():
@@ -109,10 +115,27 @@ def test_json_sheet(sheet):
         assert isinstance(track, Track)
 
 
-def test_sheet(sheet):
+def test_json_sheet_with_subsheets(sheet_subsheet):
+    assert isgenerator(iter(sheet_subsheet))
+    for subsheet in sheet_subsheet:
+        assert isinstance(subsheet, JSONSheet)
+    assert sheet_subsheet.bpm == [120, 120]
+    assert sheet_subsheet.numerator == [4, 2]
+    assert sheet_subsheet.denominator == [4, 4]
+    for subsheet_track in sheet_subsheet.tracks:
+        assert len(subsheet_track) == 4
+
+
+def test_sheet():
+    sheet = Sheet(Path(__file__).parent / 'test_sheet.json')
     assert isinstance(sheet, JSONSheet)
     assert isinstance(sheet, BaseSheet)
     assert not isinstance(sheet, Sheet)
+
+    sheet_subsheet = Sheet(Path('examples/Am-F-G-C.subsheets.json'))
+    assert isinstance(sheet_subsheet, JSONSheetWithSubsheets)
+    assert isinstance(sheet_subsheet, BaseSheet)
+    assert not isinstance(sheet_subsheet, Sheet)
 
 
 def test_synthesizer_buffer():
@@ -249,10 +272,17 @@ class DummyOutputStream:
         print(f'Writing to stream: {audio}')
 
 
-def test_player(sheet, monkeypatch, capsys):
+def test_player(sheet, sheet_subsheet, monkeypatch, capsys):
     player = Player(sheet)
     with monkeypatch.context() as m:
         m.setattr('sounddevice.OutputStream', DummyOutputStream)
         player.play()
         stdout, _ = capsys.readouterr()
         assert stdout.count('Writing to stream: ') == 3
+
+    player = Player(sheet_subsheet)
+    with monkeypatch.context() as m:
+        m.setattr('sounddevice.OutputStream', DummyOutputStream)
+        player.play()
+        stdout, _ = capsys.readouterr()
+        assert stdout.count('Writing to stream: ') == 6
