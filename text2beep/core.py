@@ -307,6 +307,7 @@ class Synthesizer:
         self._queue = Queue(1)
         self._note_value_total = \
             {track: 0 for track in range(self._track_count)}
+        self._started, self._finished = False, False
 
     def synthesize(self):
         try:
@@ -315,8 +316,10 @@ class Synthesizer:
             self._warn_not_matching_value()
         finally:
             self._serve_end_of_stream()
+            self._finished = True
 
     def _start_to_synthesize_and_serve(self):
+        self._started = True
         track_iters = self._get_track_iterators()
         # Synthesize one track until its buffer is full, and then synthesize
         # the next track. When all tracks' buffer is full, serve the buffer
@@ -406,6 +409,14 @@ class Synthesizer:
     def queue(self):
         return self._queue
 
+    @property
+    def started(self):
+        return self._started
+
+    @property
+    def finished(self):
+        return self._finished
+
 
 class SynthesizerHub:
     def __init__(self, *sheets):
@@ -448,10 +459,9 @@ class SynthesizerHub:
 
     def _drain_all_synthesizers(self):
         for idx, synthesizer in enumerate(self._synthesizers):
-            if synthesizer.queue.empty():
-                logger.debug(f'Queue of synthesizer {idx} empty')
+            if not synthesizer.started or synthesizer.finished:
                 continue
-            logger.debug(f'Queue of synthesizer {idx} not empty. Draining it')
+            logger.debug(f'Synthesizer {idx} has not finished. Draining it')
             while True:
                 result = self._consume_one_item_from_queue(synthesizer)
                 if result is None:
