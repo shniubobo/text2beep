@@ -420,17 +420,12 @@ class Synthesizer(Thread):
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, sheet):
         self._thread = _PlayerThread()
-        self._synthesizer = None
-
-    def connect(self, synthesizer):
-        self._synthesizer = synthesizer
-        self._thread.connect_queue(synthesizer.queue)
+        self._synthesizer = Synthesizer(sheet)
+        self._thread.connect_queue(self._synthesizer.queue)
 
     def play(self):
-        if self._synthesizer is None:
-            raise RuntimeError('Player not connected to a synthesizer')
         self._synthesizer.start()
         self._thread.start()
         while True:

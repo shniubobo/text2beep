@@ -64,9 +64,7 @@ def main():
     file = _parse_args(args)
 
     sheet = Sheet(file)
-    synthesizer = Synthesizer(sheet)
-    player = Player()
-    player.connect(synthesizer)
+    player = Player(sheet)
     logger.info(f'Playing {file}')
     player.play()
 

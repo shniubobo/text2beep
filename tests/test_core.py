@@ -211,7 +211,7 @@ class DummyOutputStream:
 
 
 class DummySynthesizer:
-    def __init__(self):
+    def __init__(self, _=None):
         self.queue = Queue(1)
         self.keyboard_interrupt = DummyEvent()
         self.alive = True
@@ -240,20 +240,16 @@ class DummyEvent:
 
 
 def test_player(sheet, monkeypatch, caplog):
-    player = Player()
-    with pytest.raises(RuntimeError):
-        player.play()
-    synthesizer = Synthesizer(sheet)
-    player.connect(synthesizer)
+    player = Player(sheet)
     with monkeypatch.context() as m:
         m.setattr('sounddevice.OutputStream', DummyOutputStream)
         player.play()
-        _test_player_keyboard_interrupt(caplog)
+        _test_player_keyboard_interrupt(monkeypatch, caplog)
 
 
-def _test_player_keyboard_interrupt(caplog):
-    synthesizer = DummySynthesizer()
-    player = Player()
-    player.connect(synthesizer)
-    player.play()
-    assert 'Got KeyboardInterrupt' in caplog.text
+def _test_player_keyboard_interrupt(monkeypatch, caplog):
+    with monkeypatch.context() as m:
+        m.setattr('text2beep.core.Synthesizer', DummySynthesizer)
+        player = Player(None)
+        player.play()
+        assert 'Got KeyboardInterrupt' in caplog.text
