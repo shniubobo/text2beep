@@ -256,8 +256,8 @@ def _test_synthesizer_hub_error_handling(sheet, monkeypatch, caplog):
         for _ in range(1):
             synthesizer_hub.queue.get()
             synthesizer_hub.queue.task_done()
-    assert 'Draining' in caplog.text
     thread.join()
+    assert 'Draining' in caplog.text
 
 
 class DummyOutputStream:
