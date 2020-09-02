@@ -39,6 +39,10 @@ def _get_args():
                         help='Enable verbose logging (default to off).')
     parser.add_argument('-V', '--version', action='store_true', dest='version',
                         help='Print the version number and exit.')
+    parser.add_argument('-r', '--range', action='store', dest='range',
+                        help='The range of subsheets to be played, in the '
+                             'format of "start,end" (quotes not required). If '
+                             'not specified, all subsheets will be played.')
     if not ('-V' in sys.argv or '--version' in sys.argv):
         parser.add_argument('FILE', help='The file to be converted to beeps.')
     return vars(parser.parse_args())
@@ -56,15 +60,21 @@ def _parse_args(args):
     if args['version']:
         print(f'text2beep {get_version()}')
         sys.exit(0)
-    return args['FILE']
+    if args['range'] is None:
+        play_range = None
+    else:
+        play_range = args['range'].split(',')
+        play_range = map(int, play_range)
+        play_range = tuple(play_range)
+    return args['FILE'], play_range
 
 
 def main():
     args = _get_args()
-    file = _parse_args(args)
+    file, play_range = _parse_args(args)
 
     sheet = Sheet(file)
-    player = Player(sheet)
+    player = Player(sheet, play_range)
     logger.info(f'Playing {file}')
     player.play()
 

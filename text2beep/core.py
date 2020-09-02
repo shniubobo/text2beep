@@ -501,12 +501,18 @@ class SynthesizerHub:
 
 
 class Player:
-    def __init__(self, sheet):
+    def __init__(self, sheet, play_range=None):
         self._thread = _PlayerThread()
         try:
             self._synthesizer = Synthesizer(sheet)
+            if play_range is not None:
+                logger.warning('No subsheet found. Ignoring the range')
         except TypeError:
-            self._synthesizer = SynthesizerHub(*sheet)
+            if play_range is not None:
+                start, end = play_range
+                self._synthesizer = SynthesizerHub(*list(sheet)[start:end])
+            else:
+                self._synthesizer = SynthesizerHub(*sheet)
         self._thread.connect_queue(self._synthesizer.queue)
 
     def play(self):
