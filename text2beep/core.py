@@ -256,7 +256,7 @@ class SynthesizerBuffer:
 
     def flush(self):
         for track in range(self._dimension):
-            if not self._is_track_buffer_ready(track):
+            if not self.is_track_full(track):
                 raise ValueError('Not ready to be flushed')
         result = self._mix_all_tracks()
         self._reset_ready_until()
@@ -281,15 +281,6 @@ class SynthesizerBuffer:
         full = self._exceeded_buffer[track] is not None \
                or self._size_needed_before_ready(track) == 0
         return full
-
-    def _is_track_buffer_ready(self, track):
-        if self._ready_until[track] == self._buf_size:
-            # assert not self._ready_until[track] > self._buf_size
-            return True
-        # # If the buffer of a track is not ready, the corresponding
-        # # _exceeded_buffer item must be None
-        # assert self._exceeded_buffer[track] is None
-        return False
 
     def _size_needed_before_ready(self, track):
         return self._buf_size - self._ready_until[track]
