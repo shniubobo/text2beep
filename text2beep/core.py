@@ -393,7 +393,8 @@ class Synthesizer:
         samples_x = np.linspace(0, note_duration, sample_quantity, False)
         freq = self._note_to_frequency(note)
         volume = 0.07
-        audio = volume * np.sin(2 * np.pi * freq * samples_x)
+        fade = 1 / np.exp(samples_x)
+        audio = volume * np.sin(2 * np.pi * freq * samples_x) * fade
         audio = audio.astype(DTYPE)
         return audio
 
