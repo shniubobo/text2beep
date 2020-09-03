@@ -272,7 +272,7 @@ class DummyOutputStream:
         print(f'Writing to stream: {audio}')
 
 
-def test_player(sheet, sheet_subsheet, monkeypatch, capsys):
+def test_player(sheet, sheet_subsheet, monkeypatch, capsys, caplog):
     player = Player(sheet)
     with monkeypatch.context() as m:
         m.setattr('sounddevice.OutputStream', DummyOutputStream)
@@ -280,9 +280,18 @@ def test_player(sheet, sheet_subsheet, monkeypatch, capsys):
         stdout, _ = capsys.readouterr()
         assert stdout.count('Writing to stream: ') == 3
 
-    player = Player(sheet_subsheet)
+    _ = Player(sheet, (0, 1))
+    assert 'No subsheet found.' in caplog.text
+
     with monkeypatch.context() as m:
         m.setattr('sounddevice.OutputStream', DummyOutputStream)
+
+        player = Player(sheet_subsheet)
         player.play()
         stdout, _ = capsys.readouterr()
         assert stdout.count('Writing to stream: ') == 6
+
+        player = Player(sheet_subsheet, (0, 1))
+        player.play()
+        stdout, _ = capsys.readouterr()
+        assert stdout.count('Writing to stream: ') == 2

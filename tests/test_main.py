@@ -83,3 +83,13 @@ def test_main(monkeypatch, capsys, caplog):
         m.setattr('sys.argv',
                   ['text2beep', '-q', str(Path('examples/Am-F-G-C.json'))])
         main()
+
+    with monkeypatch.context() as m:
+        args = ['text2beep', str(Path('examples/Am-F-G-C.subsheets.json')),
+                '-r', '0,1']
+        m.setattr('sys.argv', args)
+        m.setattr('sounddevice.OutputStream', DummyOutputStream)
+        _ = capsys.readouterr()
+        main()
+        stdout, _ = capsys.readouterr()
+        assert stdout.count('Writing to stream: ') == 2
