@@ -51,7 +51,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
     ],
     packages=find_packages(),
-    include_pacakge_data=True,
+    include_package_data=True,
     python_requires='>=3.6, <4',
     install_requires=[
         'numpy~=1.19.1',
