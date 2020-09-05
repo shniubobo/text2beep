@@ -61,6 +61,53 @@ Currently only JSON sheets are supported. More formats may be supported in the f
 
 where BPM (`bpm`) and time signature (`time_signature`) are used to determine the playing speed of the song, and `tracks` are all the tracks of the song.
 
+If you want to split a sheet file into several parts, or specify different BPM and time signatures for different parts of your music, you can achieve these with `subsheets`:
+
+```json
+{
+  "subsheets": [
+    {
+      "bpm": 120,
+      "time_signature": "4/4",
+      "tracks": [
+        [
+          "E4--- C4---"
+        ],
+        [
+          "C4--- A3---"
+        ],
+        [
+          "A3--- F3---"
+        ],
+        [
+          "A2--- F2---"
+        ]
+      ]
+    },
+    {
+      "bpm": 120,
+      "time_signature": "2/4",
+      "tracks": [
+        [
+          "D4--- G3---"
+        ],
+        [
+          "B3--- E3---"
+        ],
+        [
+          "G3--- C3---"
+        ],
+        [
+          "G2--- C2---"
+        ]
+      ]
+    }
+  ]
+}
+```
+
+All subsheets will be played one by one, or you can specify the playing range with the `--range` option (see `text2beep -h` for details).
+
 ### Syntax of tracks
 
 * Each track is a `list` (as is called in Python) or an `array` (as is called in JSON). All strings within the list are concatenated into a single one by the tool during runtime. Although you can put all the notes into one string, it is recommended to divide them into several ones to improve readability.
