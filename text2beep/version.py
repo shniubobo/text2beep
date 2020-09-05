@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 MAJOR = 0
-MINOR = 0
+MINOR = 1
 PATCH = 0
 POST = None
 
