@@ -1,6 +1,6 @@
 # text2beep
 
-![Tests](https://github.com/shniubobo/text2beep/workflows/Tests/badge.svg?branch=master&event=push) [![Codecov branch](https://img.shields.io/codecov/c/github/shniubobo/text2beep/master)](https://codecov.io/gh/shniubobo/text2beep) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/shniubobo/text2beep/latest/master?sort=semver)
+![Tests](https://github.com/shniubobo/text2beep/workflows/Tests/badge.svg?branch=master&event=push) [![Codecov branch](https://img.shields.io/codecov/c/github/shniubobo/text2beep/master)](https://codecov.io/gh/shniubobo/text2beep) ![PyPI](https://img.shields.io/pypi/v/text2beep?color=informational) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/text2beep) ![PyPI - Implementation](https://img.shields.io/pypi/implementation/text2beep) ![PyPI - License](https://img.shields.io/pypi/l/text2beep?color=informational) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/shniubobo/text2beep/latest/master?sort=semver)
 
 Language: 中文 | [English](README_en.md)
 
@@ -10,13 +10,19 @@ Language: 中文 | [English](README_en.md)
 
 ## 安装
 
-本程序目前还未发布任何版本，请耐心等待第一个版本的发布。如果需要在第一个版本发布时收到通知，请点击页面右上角 Watch -> Releases Only。
+可以从 PyPI 安装最新的 release：
 
-在发布第一个版本之前，你可以通过这种方式安装：
+```
+pip install text2beep
+```
+
+或从 Github 安装：
 
 ```
 pip install git+https://github.com/shniubobo/text2beep.git#egg=text2beep
 ```
+
+如果需要在新版本发布时收到通知，请点击页面右上角 Watch -> Releases Only。
 
 ## 使用方法
 
