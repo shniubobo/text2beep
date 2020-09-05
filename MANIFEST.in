@@ -1,0 +1,7 @@
+include docs/*.md
+include examples/*.json
+include tests/test_*
+include .flake8
+include LICENSE.txt
+include pyproject.toml
+include README*.md

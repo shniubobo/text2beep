@@ -51,9 +51,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
     ],
     packages=find_packages(),
-    data_files=[
-        ('.', ['LICENSE.txt', 'README*.md']),
-    ],
+    include_pacakge_data=True,
     python_requires='>=3.6, <4',
     install_requires=[
         'numpy~=1.19.1',
