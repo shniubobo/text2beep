@@ -1,4 +1,5 @@
 codecov:
+  token: secret:8YBL5ZgBw128TiX9ZrzWtiHROjqup7hCh78wuNO6Ul1wy2ykSuMTg4apnITrepV4JXqA+c4CpdfLgoJZX6V4UUWEXOBNqSRpvoI9rPz/pzI=
   notify:
     after_n_builds: 9
 
