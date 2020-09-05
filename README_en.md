@@ -145,7 +145,7 @@ All subsheets will be played one by one, or you can specify the playing range wi
 
 ## Example songs
 
-#### [`Astronauts.json`](examples/Astronauts.json)
+#### [`Astronauts.json`](examples/Astronauts.json) and [`Astronauts.full.json`](examples/Astronauts.full.json)
 
 * Song name: アストロノーツ
 * Song by: [椎名もた](https://www.nicovideo.jp/watch/nm14629738)

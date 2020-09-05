@@ -145,7 +145,7 @@ text2beep /path/to/your/sheet.json
 
 ## 示例乐曲
 
-#### [`Astronauts.json`](examples/Astronauts.json)
+#### [`Astronauts.json`](examples/Astronauts.json) 与 [`Astronauts.full.json`](examples/Astronauts.full.json)
 
 * 曲名: アストロノーツ
 * 原作者: [椎名もた](https://www.nicovideo.jp/watch/nm14629738)
