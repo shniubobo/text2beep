@@ -1,6 +1,6 @@
-# text2beep
+# text2beep ![PyPI](https://img.shields.io/pypi/v/text2beep?color=informational)
 
-![Tests](https://github.com/shniubobo/text2beep/workflows/Tests/badge.svg?branch=master&event=push) [![Codecov branch](https://img.shields.io/codecov/c/github/shniubobo/text2beep/master)](https://codecov.io/gh/shniubobo/text2beep) ![PyPI](https://img.shields.io/pypi/v/text2beep?color=informational) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/text2beep) ![PyPI - Implementation](https://img.shields.io/pypi/implementation/text2beep) ![PyPI - License](https://img.shields.io/pypi/l/text2beep?color=informational) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/shniubobo/text2beep/latest/master?sort=semver)
+![Tests](https://github.com/shniubobo/text2beep/workflows/Tests/badge.svg?branch=master&event=push) [![Codecov branch](https://img.shields.io/codecov/c/github/shniubobo/text2beep/master)](https://codecov.io/gh/shniubobo/text2beep) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/shniubobo/text2beep/latest/master?sort=semver)
 
 Language: 中文 | [English](README_en.md)
 
@@ -9,6 +9,8 @@ Language: 中文 | [English](README_en.md)
 程序目前还在早期开发阶段，仅仅实现了最基本的合成和播放功能，之后还会陆续添加更多功能。
 
 ## 安装
+
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/text2beep) ![PyPI - Implementation](https://img.shields.io/pypi/implementation/text2beep)
 
 可以从 PyPI 安装最新的 release：
 
@@ -174,6 +176,8 @@ text2beep /path/to/your/sheet.json
 本项目欢迎你的贡献，详见 [`CONTRIBUTING.md`](docs/CONTRIBUTING.md)。
 
 ## 许可
+
+![PyPI - License](https://img.shields.io/pypi/l/text2beep?color=informational)
 
 本程序以 GNU GPL-3.0-or-later 许可发布。详见 [`LICENSE.txt`](LICENSE.txt)。
 

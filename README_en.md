@@ -1,6 +1,6 @@
-# text2beep
+# text2beep ![PyPI](https://img.shields.io/pypi/v/text2beep?color=informational)
 
-![Tests](https://github.com/shniubobo/text2beep/workflows/Tests/badge.svg?branch=master&event=push) [![Codecov branch](https://img.shields.io/codecov/c/github/shniubobo/text2beep/master)](https://codecov.io/gh/shniubobo/text2beep) ![PyPI](https://img.shields.io/pypi/v/text2beep?color=informational) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/text2beep) ![PyPI - Implementation](https://img.shields.io/pypi/implementation/text2beep) ![PyPI - License](https://img.shields.io/pypi/l/text2beep?color=informational) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/shniubobo/text2beep/latest/master?sort=semver)
+![Tests](https://github.com/shniubobo/text2beep/workflows/Tests/badge.svg?branch=master&event=push) [![Codecov branch](https://img.shields.io/codecov/c/github/shniubobo/text2beep/master)](https://codecov.io/gh/shniubobo/text2beep) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/shniubobo/text2beep/latest/master?sort=semver)
 
 Language: [中文](README.md) | English
 
@@ -9,6 +9,8 @@ Language: [中文](README.md) | English
 The tool is still in its early development with only such basic features as synthesizing and playing. More features will be added in the future.
 
 ## Installation
+
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/text2beep) ![PyPI - Implementation](https://img.shields.io/pypi/implementation/text2beep)
 
 You may install the latest release from PyPI:
 
@@ -174,6 +176,8 @@ All subsheets will be played one by one, or you can specify the playing range wi
 Any contribution is much appreciated. Please see [`CONTRIBUTING_en.md`](docs/CONTRIBUTING_en.md) for details.
 
 ## License
+
+![PyPI - License](https://img.shields.io/pypi/l/text2beep?color=informational)
 
 The program is licensed under GNU GPL-3.0-or-later. Please see [`LICENSE.txt`](LICENSE.txt) for more details.
 
